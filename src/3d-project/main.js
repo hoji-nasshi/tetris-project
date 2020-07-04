@@ -9,19 +9,17 @@ function init() {
   const renderer = new THREE.WebGLRenderer({
     canvas: document.querySelector("#myCanvas")
   });
-  renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.setSize(width, height);
+  // レンダラーのサイズを変更
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  // レンダラーのカラーを変更
+  renderer.setClearColor(new THREE.Color(0xEEEEEE));
 
   // シーンを作成
   const scene = new THREE.Scene();
 
   // カメラを作成
   const camera = new THREE.PerspectiveCamera(
-    45,
-    width / height,
-    1,
-    10000
-  );
+    45,window.innerWidth / window.innerHeight,0.1,1000);
   camera.position.set(0, 0, +1000);
 
   // 箱を作成
