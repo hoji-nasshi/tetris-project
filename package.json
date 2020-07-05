@@ -2,7 +2,6 @@
   "name": "tetris-project",
   "version": "1.0.0",
   "main": "index.js",
-  "author": "ryota.nakayama <ryota.nakayama@optim.co.jp>",
   "license": "MIT",
   "dependencies": {
     "three": "^0.118.3"
