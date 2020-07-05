@@ -2,8 +2,8 @@ let CANVAS_WIDTH	= 600; // Canvasの幅
 let CANVAS_HEIGHT	= 600; // Canvasの高さ
 let BLOCK_WIDTH = 4;
 let BLOCK_HEIGHT = 4;
-let FIELD_WIDTH		= 12; // フィールドの幅
-let FIELD_HEIGHT	= 22; // フィールドの高さ
+let FIELD_WIDTH		= 12; // フィールドの幅（マス）
+let FIELD_HEIGHT	= 22; // フィールドの高さ（マス）
 
 let FIELD_X			= 40; // フィールドのCanvas内のX座標
 let FIELD_Y			= 40; // フィールドのCanvas内のY座標
@@ -240,6 +240,22 @@ function init() { //初期関数
 function update(){
     if(cnt%30==0){
         by ++;
+        var breakflag = false;
+		for(var i = 0;i < BLOCK_HEIGHT;i++) {
+			for(var j = 0;j < BLOCK_WIDTH;j++) {
+				//	配列番号がおかしい場合は処理しない
+				if(bx + j < 0 || bx + j >= FIELD_WIDTH ||
+					by + i < 0 || by + i >= FIELD_HEIGHT) continue;
+				
+				//	同じ座標（マス）にブロックとブロック・壁が重なったら
+				if(field[by + i][bx + j] != 0 && block[btype][brot][i][j] == 1) {
+					by--; // 移動距離分を戻す
+					breakflag = true; // ループを抜ける
+					break;
+				}
+			}
+			if(breakflag) break;
+		}
     }
 }
 
@@ -294,7 +310,7 @@ function main() {
     drawField(); // フィールドを描画
     drawFrame();
 
-    //cnt++;
+    cnt++;
 
     requestAnimationFrame(main); // ループさせる
 
