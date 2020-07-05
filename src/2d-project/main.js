@@ -200,11 +200,14 @@ var field;
 
 var btype, brot;
 var bx, by;
+
+var cnt;
 /***
  * 処理関数
  * function
 */
 function init() { //初期関数
+    cnt = 1;//カウンタ変数
     field = [ // Fieldの内容
         [9, 9, 9, 0, 0, 0, 0, 0, 0, 9, 9, 9,],
         [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,],
@@ -234,6 +237,12 @@ function init() { //初期関数
 	btype = 3; // ブロックの種類
 	brot = 1; // ブロックの回転種類
 }
+function update(){
+    if(cnt%30==0){
+        by ++;
+    }
+}
+
 //	落下ブロックの描画
 function drawBlock() {
 	context.fillStyle = "rgba(255, 100, 100, 1.0)"; // 赤色に設定
@@ -278,8 +287,15 @@ init();
 requestAnimationFrame(main);
 function main() {
     context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT); // 画面クリア
+
+    update();
+
     drawBlock();
     drawField(); // フィールドを描画
     drawFrame();
-	requestAnimationFrame(main); // ループさせる
+
+    //cnt++;
+
+    requestAnimationFrame(main); // ループさせる
+
 }
