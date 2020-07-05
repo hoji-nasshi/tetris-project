@@ -267,7 +267,7 @@ function drawField() {
 }
 //	フィールド枠描画
 function drawFrame() {
-	context.fillStyle = "rgba(230, 230, 230, 1.0)"; // 塗り潰し色を白色に設定
+	context.fillStyle = "rgba(128, 128, 128, 1.0)"; // 塗り潰し色をグレーに設定
 	//	縦線を描画(グリッドのこと)
 	for(var i = 0;i < FIELD_WIDTH + 1;i++) {
         context.fillRect(FIELD_X + i * 25, FIELD_Y, 1, 25 * FIELD_HEIGHT);
