@@ -287,9 +287,15 @@ function enterBlock() {
 			if(block[btype][brot][i][j] == 0) continue;
 			
 			//	ブロックをフィールドに登録
-			field[by + i][bx + j] = 1;
+            field[by + i][bx + j] = 1;
 		}
-	}
+    }
+    bflag = false; // ブロック着地フラグを解除
+	bx = 4; // ブロックのX座標
+	by = -4; // ブロックのY座標
+	
+	btype = 0; // ブロックの種類
+	brot = 0; // ブロックの回転種類
 }
 
 //	落下ブロックの描画
