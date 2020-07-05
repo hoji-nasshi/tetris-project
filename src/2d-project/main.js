@@ -216,6 +216,8 @@ var bx, by;
 var cnt;
 
 var bflag;//フラッグの着地フラグ
+var delflag;//ブロックの削除フラグ
+var dropflag;//行削除後のブロック落下フラグ
 /***
  * 処理関数
  * function
@@ -249,28 +251,91 @@ function init() { //初期関数
 	bx = 4; // ブロックのX座標（マス）
 	by = 0; // ブロックのY座標（マス）
 	btype = 3; // ブロックの種類
-	brot = 1; // ブロックの回転種類
+    brot = 1; // ブロックの回転種類
+    
+    delflag = Array(FIELD_HEIGHT); // 配列として定義
+    dropflag = false; // 行削除後のブロック落下フラグ
 }
+
+//	「何もない行」かどうか判定
+function rowJudge(num) {
+	var flag = true;
+	
+	for(var i = 1;i < FIELD_WIDTH - 1;i++) {
+		if(field[num][i] != 0) { // １つでもブロックが埋まっていたらフラグをオフにして処理を終了する
+			flag = false;
+			break;
+		}
+	}
+	
+	return flag;
+}
+
 function update(){
     if(cnt%30==0){
-        by ++;
-        var breakflag = false;
-		for(var i = 0;i < BLOCK_HEIGHT;i++) {
-			for(var j = 0;j < BLOCK_WIDTH;j++) {
-				//	配列番号がおかしい場合は処理しない
-				if(bx + j < 0 || bx + j >= FIELD_WIDTH ||
-					by + i < 0 || by + i >= FIELD_HEIGHT) continue;
-				
-				//	同じ座標（マス）にブロックとブロック・壁が重なったら
-				if(field[by + i][bx + j] != 0 && block[btype][brot][i][j] == 1) {
-                    bflag = true;//ブロックの着地フラグをオンにする
-					by--; // 移動距離分を戻す
-					breakflag = true; // ループを抜ける
+        if(dropflag) { // 落下フラグがオンなら
+			var num = 0; // 削除された行の番号
+			
+			for(var i = FIELD_HEIGHT - 2;i > 0;i--) {
+				if(rowJudge(i)) { // 削除された行かどうか判定
+					num = i; // 削除された行なら「num」に代入してループを抜ける
 					break;
 				}
 			}
-			if(breakflag) break;
+			
+			for(var i = num;i > 1;i--) { // 「num」番目の行より上にあるブロックを対象に落下させる
+				for(var j = 1;j < FIELD_WIDTH -1;j++) {
+					field[i][j] = field[i - 1][j]; // １つ上の行と全く同じ内容にする
+				}
+			}
+			for(var i = 1;i < FIELD_WIDTH - 1;i++) { // 「１」行目は必ず空白になるので、削除する
+				field[1][i] = 0;
+			}
+			
+			var flag = false;
+			
+			for(var i = FIELD_HEIGHT - 2;i > 1;i--) {
+				if(rowJudge(i)) { // 下から順に見て、一番最初の空白行を「num」に代入
+					flag = true; // フラグをオンにする
+					num = i;
+					break;
+				}
+			}
+			
+			if(flag) { // フラグがオンなら（空白行があるなら）
+				dropflag = false;
+				for(var i = 2;i < num;i++) {
+					if(!rowJudge(i)) { // 2〜「num」までの間に空白があるなら落下処理を続行させる
+						dropflag = true;
+						break;
+					}
+				}
+			}
+			else if(!flag) { // 空白行がないなら落下フラグをオフにする
+				dropflag = false;
+			}
 		}
+		else if(!dropflag) {
+
+            by ++;
+            var breakflag = false;
+            for(var i = 0;i < BLOCK_HEIGHT;i++) {
+                for(var j = 0;j < BLOCK_WIDTH;j++) {
+                    //	配列番号がおかしい場合は処理しない
+                    if(bx + j < 0 || bx + j >= FIELD_WIDTH ||
+                        by + i < 0 || by + i >= FIELD_HEIGHT) continue;
+                    
+                    //	同じ座標（マス）にブロックとブロック・壁が重なったら
+                    if(field[by + i][bx + j] != 0 && block[btype][brot][i][j] == 1) {
+                        bflag = true;//ブロックの着地フラグをオンにする
+                        by--; // 移動距離分を戻す
+                        breakflag = true; // ループを抜ける
+                        break;
+                    }
+                }
+                if(breakflag) break;
+            }
+        }
     }
 }
 
@@ -290,6 +355,8 @@ function enterBlock() {
             field[by + i][bx + j] = 1;
 		}
     }
+    deleteJudge(); // 削除行を検索
+
     bflag = false; // ブロック着地フラグを解除
 	bx = 4; // ブロックのX座標
 	by = -4; // ブロックのY座標
@@ -297,6 +364,33 @@ function enterBlock() {
 	btype = 0; // ブロックの種類
 	brot = 0; // ブロックの回転種類
 }
+//	ブロック行の削除判定
+function deleteJudge() {
+	for(var i = 1;i < FIELD_HEIGHT - 1;i++) { // 壁は含まないので「1〜FIELD_HEIGHT - 1」の間になります。
+		for(var j = 1;j < FIELD_WIDTH - 1;j++) {
+			if(field[i][j] != 0) {
+				delflag[i] = true;
+			}
+			else if(field[i][j] == 0) { // 行内に１つでも空白があったら削除フラグは立てずに、ループを抜ける
+				delflag[i] = false;
+				break;
+			}
+		}
+	}
+	
+	for(var i = 1;i < FIELD_HEIGHT - 1;i++) {
+        if(!delflag[i]) continue; // 削除フラグが立っていなかったら処理しない
+        
+        if(!dropflag) dropflag = true; // 落下フラグがオフならオンにする
+		
+		//	ブロック行を削除
+		for(var j = 1;j < FIELD_WIDTH - 1;j++) field[i][j] = 0;
+	}
+	
+	//	delflag の初期化
+	for(var i = 0;i < FIELD_HEIGHT;i++) delflag[i] = false;
+}
+
 
 //	落下ブロックの描画
 function drawBlock() {
