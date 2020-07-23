@@ -1,7 +1,7 @@
 let CANVAS_WIDTH	= 600; // Canvasの幅
 let CANVAS_HEIGHT	= 600; // Canvasの高さ
-let BLOCK_WIDTH = 4;
-let BLOCK_HEIGHT = 4;
+let BLOCK_WIDTH = 4; //マス
+let BLOCK_HEIGHT = 4; //マス
 let FIELD_WIDTH		= 12; // フィールドの幅（マス）
 let FIELD_HEIGHT	= 22; // フィールドの高さ（マス）
 
@@ -19,6 +19,8 @@ key[KEY_LEFT]	= 0;
 key[KEY_UP]		= 0;
 key[KEY_DOWN]	= 0;
 key[KEY_SPACE]	= 0;
+
+let speedMagnification = 1; //落下スピードの倍率
 
 let block = [ // ブロックの定義
     [	//	block type 0
@@ -218,6 +220,7 @@ var cnt;
 var bflag;//フラッグの着地フラグ
 var delflag;//ブロックの削除フラグ
 var dropflag;//行削除後のブロック落下フラグ
+
 /***
  * 処理関数
  * function
@@ -248,8 +251,8 @@ function init() { //初期関数
         [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,],
         [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,],
     ];
-	bx = 4; // ブロックのX座標（マス）
-	by = 0; // ブロックのY座標（マス）
+	bx = 4; // ブロックのX座標（マス）初期位置でもある？
+	by = 0; // ブロックのY座標（マス）初期位置でもある？
 	btype = 3; // ブロックの種類
     brot = 1; // ブロックの回転種類
     
@@ -272,7 +275,7 @@ function rowJudge(num) {
 }
 
 function update(){
-    if(cnt%30==0){
+    if(cnt%(30/speedMagnification)==0){
         if(dropflag) { // 落下フラグがオンなら
 			var num = 0; // 削除された行の番号
 			
@@ -350,7 +353,7 @@ function enterBlock() {
 			
 			//	ブロックが「０」なら処理しない
 			if(block[btype][brot][i][j] == 0) continue;
-			
+            
 			//	ブロックをフィールドに登録
             field[by + i][bx + j] = 1;
 		}
@@ -421,7 +424,7 @@ function drawField() {
 }
 //	フィールド枠描画
 function drawFrame() {
-	context.fillStyle = "rgba(128, 128, 128, 1.0)"; // 塗り潰し色をグレーに設定
+	context.fillStyle = "rgba(238, 238, 238, 1.0)"; // 塗り潰し色を白に設定
 	//	縦線を描画(グリッドのこと)
 	for(var i = 0;i < FIELD_WIDTH + 1;i++) {
         context.fillRect(FIELD_X + i * 25, FIELD_Y, 1, 25 * FIELD_HEIGHT);
@@ -486,7 +489,13 @@ function keyCtrl() {
 		// キーの状態を更新
 		if(key[KEY_DOWN] == 1) key[KEY_DOWN]++;
 		else if(key[KEY_UP] == 1) key[KEY_UP]++;
-	}
+    }
+    if(key[KEY_SPACE] == 1){ //スペースボタン押下でスピードアップ
+        speedMagnification = 10;
+    }
+    else if(key[KEY_SPACE] == 0){
+        speedMagnification = 1;
+    }
 }
 
 /***
@@ -521,7 +530,6 @@ init();
 requestAnimationFrame(main);
 function main() {
     context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT); // 画面クリア
-
     keyCtrl();
     update();
     enterBlock();
