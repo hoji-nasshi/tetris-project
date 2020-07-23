@@ -8,6 +8,15 @@ let FIELD_HEIGHT	= 22; // フィールドの高さ（マス）
 let FIELD_X			= 40; // フィールドのCanvas内のX座標
 let FIELD_Y			= 40; // フィールドのCanvas内のY座標
 
+// NEXT BLOCKを表示するエリア
+let NEXT_AREA_WIDTH = 8;
+let NEXT_AREA_HEIGHT = 8;
+
+let NEXT_AREA_X = 380;
+let NEXT_AREA_Y = 40;
+
+let BLOCK_QUEUE = [] // 次のブロックを予測するためのキュー
+
 let KEY_RIGHT		= 0; // 右キー
 let KEY_LEFT		= 1; // 左キー
 let KEY_UP			= 2; // 上キー
@@ -252,9 +261,11 @@ function init() { //初期関数
         [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,],
     ];
 	bx = 4; // ブロックのX座標（マス）初期位置でもある？
-	by = 0; // ブロックのY座標（マス）初期位置でもある？
-	btype = 3; // ブロックの種類
-    brot = 1; // ブロックの回転種類
+    by = 0; // ブロックのY座標（マス）初期位置でもある？
+    btype = Math.floor(Math.random() * 6); // ブロックの種類（初期）
+    brot = 1; // ブロックの回転種類（初期）
+    BLOCK_QUEUE.push(btype) // キューにブロックを登録
+    BLOCK_QUEUE.push(Math.floor(Math.random() * 6)) //次のブロックを登録
     
     delflag = Array(FIELD_HEIGHT); // 配列として定義
     dropflag = false; // 行削除後のブロック落下フラグ
@@ -363,9 +374,11 @@ function enterBlock() {
     bflag = false; // ブロック着地フラグを解除
 	bx = 4; // ブロックのX座標
 	by = -4; // ブロックのY座標
-	
-	btype = Math.floor( Math.random() * 6); // 次のブロックをランダム生成
-	brot = 0; // ブロックの回転種類
+    
+    BLOCK_QUEUE.shift();
+    btype = BLOCK_QUEUE[0]; // 次のブロックを表示
+    BLOCK_QUEUE.push(Math.floor(Math.random() * 6));
+	brot = 1; // ブロックの回転種類
 }
 //	ブロック行の削除判定
 function deleteJudge() {
@@ -435,6 +448,44 @@ function drawFrame() {
 		context.fillRect(FIELD_X, FIELD_Y + i * 25, 25 * FIELD_WIDTH, 1);
 	}
 }
+// NEXT BLOCKエリアの描画
+function drawNextArea() {
+    context.fillStyle = "rgba(238, 238, 238, 0.0)";
+    for(var i = 0;i < NEXT_AREA_HEIGHT;i++){
+        for(var j = 0;j < NEXT_AREA_WIDTH;j++){
+            context.fillRect(NEXT_AREA_X + j * 25,NEXT_AREA_Y + i * 25,25,25);
+        }
+    }
+}
+// NEXT BLOCKエリア枠の描画
+function drawNextAreaFrame(){
+    context.fillStyle = "rgba(238, 238, 238, 1.0)"; // 塗り潰し色を白に設定
+
+    // エリアの説明書き
+    context.font = "18px serif";
+    context.fillText("NEXT BLOCK...",NEXT_AREA_X + 10,NEXT_AREA_Y + 20)
+
+	//	縦線を描画(グリッドのこと)
+	for(var i in array=[0,NEXT_AREA_WIDTH]) {
+        context.fillRect(NEXT_AREA_X + array[i] * 25, NEXT_AREA_Y, 1, 25 * NEXT_AREA_HEIGHT);
+        // contenxt.fillRect(x座標,y座標,幅,高さ)
+	}
+	//	横線を描画
+	for(var i in array=[0,NEXT_AREA_HEIGHT]) {
+		context.fillRect(NEXT_AREA_X, NEXT_AREA_Y + array[i] * 25, 25 * NEXT_AREA_WIDTH, 1);
+    }
+    
+    // 次のブロックを表示
+	context.fillStyle = "rgba(255, 100, 100, 1.0)"; // 赤色に設定
+	for(var i = 0;i < BLOCK_HEIGHT;i++) {
+		for(var j = 0;j < BLOCK_WIDTH;j++) {
+			if(block[BLOCK_QUEUE[1]][1][i][j] == 1) {
+				context.fillRect(NEXT_AREA_X + (2 + j) * 25, NEXT_AREA_Y + (2 + i) * 25, 25, 25);
+			}
+		}
+	}
+}
+
 //キー操作関数
 function keyCtrl() {
 	if(key[KEY_RIGHT] <= 1 && key[KEY_LEFT] <= 1) {
@@ -537,6 +588,8 @@ function main() {
     drawBlock();
     drawField(); // フィールドを描画
     drawFrame();
+    drawNextArea();
+    drawNextAreaFrame();
 
     cnt++;
 
