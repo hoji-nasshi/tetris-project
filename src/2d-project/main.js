@@ -364,7 +364,7 @@ function enterBlock() {
 	bx = 4; // ブロックのX座標
 	by = -4; // ブロックのY座標
 	
-	btype = 0; // ブロックの種類
+	btype = Math.floor( Math.random() * 6); // 次のブロックをランダム生成
 	brot = 0; // ブロックの回転種類
 }
 //	ブロック行の削除判定
