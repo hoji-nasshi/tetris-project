@@ -230,6 +230,16 @@ var bflag;//フラッグの着地フラグ
 var delflag;//ブロックの削除フラグ
 var dropflag;//行削除後のブロック落下フラグ
 
+var blockColors = {
+    red:"rgba(255, 100, 100, 1.0)",
+    blue:"rgba(99, 107, 255, 1.0)",
+    green:"rgba(99, 255, 123, 1.0)",
+    yellow:"rgba(255, 232, 99, 1.0)"
+}
+var blockColorLength = Object.keys(blockColors).length;
+var blockColorNumber = 0
+var blockColor = blockColors[Object.keys(blockColors)[blockColorNumber]]; // 初期カラー
+
 /***
  * 処理関数
  * function
@@ -355,7 +365,7 @@ function update(){
 
 //	落下ブロックの登録
 function enterBlock() {
-	if(!bflag) return;
+    if(!bflag) return;
 	
 	for(var i = 0;i < BLOCK_HEIGHT;i++) {
 		for(var j = 0;j < BLOCK_WIDTH;j++) {
@@ -366,7 +376,7 @@ function enterBlock() {
 			if(block[btype][brot][i][j] == 0) continue;
             
 			//	ブロックをフィールドに登録
-            field[by + i][bx + j] = 1;
+            field[by + i][bx + j] = blockColorNumber+1;
 		}
     }
     deleteJudge(); // 削除行を検索
@@ -378,7 +388,10 @@ function enterBlock() {
     BLOCK_QUEUE.shift();
     btype = BLOCK_QUEUE[0]; // 次のブロックを表示
     BLOCK_QUEUE.push(Math.floor(Math.random() * 6));
-	brot = 1; // ブロックの回転種類
+    brot = 1; // ブロックの回転種類
+
+    blockColorNumber = Math.floor(Math.random()* blockColorLength )
+    blockColor = blockColors[Object.keys(blockColors)[blockColorNumber]]; // ランダム色に設定
 }
 //	ブロック行の削除判定
 function deleteJudge() {
@@ -410,7 +423,8 @@ function deleteJudge() {
 
 //	落下ブロックの描画
 function drawBlock() {
-	context.fillStyle = "rgba(255, 100, 100, 1.0)"; // 赤色に設定
+    context.fillStyle = blockColor;
+
 	//	ブロックを描画
 	for(var i = 0;i < BLOCK_HEIGHT;i++) {
 		for(var j = 0;j < BLOCK_WIDTH;j++) {
@@ -428,6 +442,9 @@ function drawField() {
                 var str;
                 switch(field[i][j]) {
                 case 1: str = "rgba(255, 100, 100, 1.0)"; break; // 赤に設定
+                case 2: str = "rgba(99, 107, 255, 1.0)"; break; //青に設定
+                case 3: str = "rgba(99, 255, 123, 1.0)"; break; //緑に設定
+                case 4: str = "rgba(255, 232, 99, 1.0)"; break; //黄色に設定
                 case 9: str = "rgba(150, 150, 150, 1.0)"; break; // グレーに設定
                 }
                 context.fillStyle = str;
